@@ -6,8 +6,9 @@ const router = express.Router();
 const database = require("./db");
 
 router.post("/register", (request, response) => {
+  console.log(request);
   if (!request.body || !request.body.username || !request.body.name) {
-    response.json({
+    response.status(400).json({
       status: "failed",
       message: "Request missing name or username field!",
     });
@@ -19,7 +20,7 @@ router.post("/register", (request, response) => {
   let name = request.body.name;
 
   if (database[username] && database[username].registered) {
-    response.json({
+    response.status(400).json({
       status: "failed",
       message: `Username ${username} already exists`,
     });
@@ -49,7 +50,7 @@ router.post("/register", (request, response) => {
 
 router.post("/login", (request, response) => {
   if (!request.body || !request.body.username) {
-    response.json({
+    response.status(400).json({
       status: "failed",
       message: "Request missing username field!",
     });
@@ -60,7 +61,7 @@ router.post("/login", (request, response) => {
   let username = request.body.username;
 
   if (!database[username] || !database[username].registered) {
-    response.json({
+    response.status(400).json({
       status: "failed",
       message: `User ${username} does not exist!`,
     });
@@ -88,7 +89,7 @@ router.post("/response", (request, response) => {
     !request.body.type ||
     request.body.type !== "public-key"
   ) {
-    response.json({
+    response.status(400).json({
       status: "failed",
       message:
         "Response missing one or more of id/rawId/response/type fields, or type is not public-key!",
@@ -104,19 +105,19 @@ router.post("/response", (request, response) => {
 
   /* Check challenge... */
   if (clientData.challenge !== request.session.challenge) {
-    response.json({
+    response.status(400).json({
       status: "failed",
       message: "Challenges don't match!",
     });
   }
 
   /* ...and origin */
-  if (clientData.origin !== config.origin) {
-    response.json({
-      status: "failed",
-      message: "Origins don't match!",
-    });
-  }
+  // if (clientData.origin !== config.origin) {
+  //   response.json({
+  //     status: "failed",
+  //     message: "Origins don't match!",
+  //   });
+  // }
 
   let result;
   if (webauthnResp.response.attestationObject !== undefined) {
@@ -134,7 +135,7 @@ router.post("/response", (request, response) => {
       database[request.session.username].authenticators
     );
   } else {
-    response.json({
+    response.status(400).json({
       status: "failed",
       message: "Can not determine type of response!",
     });
@@ -144,7 +145,7 @@ router.post("/response", (request, response) => {
     request.session.loggedIn = true;
     response.json({ status: "ok" });
   } else {
-    response.json({
+    response.status(400).json({
       status: "failed",
       message: "Can not authenticate signature!",
     });

@@ -10,10 +10,21 @@ const config = require("./config.json");
 const defaultroutes = require("./routes/default");
 // const passwordauth = require("./routes/password");
 const webuathnauth = require("./routes/webauthn.js");
+const cors = require("cors");
 
 const app = express();
 
 app.use(bodyParser.json());
+
+// Set up CORS to allow requests from specific origins
+const corsOptions = {
+  origin: "http://localhost:4200", // allow requests only from this origin
+  methods: "GET,POST,PUT,DELETE", // allowed HTTP methods
+  allowedHeaders: "Content-Type,Authorization", // allowed headers
+  credentials: true, // enable to allow cookies
+};
+
+app.use(cors(corsOptions));
 
 /* ----- session ----- */
 app.use(
